@@ -6,7 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
   config.vm.define :wb_server do |wb|
-    wb.vm.box = "Centos1706v2"
+    wb.vm.box = "Centos1704v2"
     wb.vm.network :private_network, ip: "192.168.56.101"
     #server.vm.network "public_network", bridge: "eth4", ip:"192.168.131.100", netmask: "255.255.255.0"
     wb.vm.provider :virtualbox do |vb|
@@ -24,7 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
   config.vm.define :db_server do |db|
-    db.vm.box = "Centos1706v2"
+    db.vm.box = "Centos1704v2"
     db.vm.network :private_network, ip: "192.168.56.102"
     #client.vm.network "public_network", bridge: "eth4", ip:"192.168.131.101", netmask: "255.255.255.0"
     db.vm.provider :virtualbox do |vb|

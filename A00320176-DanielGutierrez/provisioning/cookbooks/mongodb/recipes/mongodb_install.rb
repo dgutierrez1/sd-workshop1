@@ -12,11 +12,10 @@ end
 bash 'install_mongodb' do
 	code <<-EOH
     yum  install -y mongodb-org
-    npm install --prefix /home/vagrant/graphql-server/ mongoose
 	EOH
 end
 
-cookbook_file '/home/vagrant/graphql-server/mongodb.js' do
+cookbook_file '/home/vagrant/graphql-server/server/mongodb.js' do
 	source 'mongodb.js'
 	mode 0644
 	owner 'root'

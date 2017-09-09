@@ -3,5 +3,6 @@ service "mongod" do
 end
 
 execute 'server_init' do
-  command 'babel /home/vagrant/graphql-server/index.js'
+  command 'npm run production --prefix /home/vagrant/graphql-server/ '   
+
 end

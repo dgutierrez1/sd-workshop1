@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/memes');
+
 
 var Meme = mongoose.model('Meme', {  
   id: mongoose.Schema.Types.ObjectId,

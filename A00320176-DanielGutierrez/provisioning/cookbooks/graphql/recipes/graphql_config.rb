@@ -1,23 +1,41 @@
-cookbook_file '/home/vagrant/graphql-server/index.js' do
-	source 'index.js'
-	mode 0644
-	owner 'root'
-	group 'wheel'
-end
 
-cookbook_file '/home/vagrant/graphql-server/server.js' do
+
+cookbook_file '/home/vagrant/graphql-server/server/server.js' do
 	source 'server.js'
 	mode 0644
 	owner 'root'
 	group 'wheel'
 end
 
-cookbook_file '/home/vagrant/graphql-server/schema.js' do
+cookbook_file '/home/vagrant/graphql-server/server/schema.js' do
 	source 'schema.js'
 	mode 0644
 	owner 'root'
 	group 'wheel'
 end
+
+cookbook_file '/home/vagrant/graphql-server/.babelrc' do
+	source '.babelrc'
+	mode 0644
+	owner 'root'
+	group 'wheel'
+end
+
+cookbook_file '/home/vagrant/graphql-server/bin/dev' do
+	source 'dev'
+	mode 0644
+	owner 'root'
+	group 'wheel'
+end
+
+cookbook_file '/home/vagrant/graphql-server/bin/production' do
+	source 'production'
+	mode 0644
+	owner 'root'
+	group 'wheel'
+end
+
+
 
 service "firewalld" do
 	action [ :enable, :start]

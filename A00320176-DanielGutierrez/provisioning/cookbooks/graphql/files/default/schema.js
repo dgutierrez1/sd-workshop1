@@ -13,8 +13,7 @@ var {
 
 var MemeType = new graphql.GraphQLObjectType({  
   name: 'meme',
-  fields: function () {
-    return {
+  fields:  {
       id: {
         type: graphql.GraphQLID
       },
@@ -33,29 +32,29 @@ var MemeType = new graphql.GraphQLObjectType({
       score: {
         type: graphql.GraphQLFloat
       }
-    }
   }
 });
 
 
 var queryType = new graphql.GraphQLObjectType({  
   name: 'Query',
-  fields: function () {
+  fields: function() {
     return {
       memes: {
         type: new graphql.GraphQLList(MemeType),
-        resolve: function () {
+        resolve: function(){
             Meme.find((err, memes)=> {
                 if(err){
                     return err;
                 }else{
                     return memes;
                 }
-            });
-        }
+            })
+          }
       }
     }
   }
+  
 });
 var MutationAdd = {  
   type: MemeType,
@@ -74,12 +73,16 @@ var MutationAdd = {
       score: 0
     });
     newMeme.id = newMeme._id
-    return new Promise((resolve, reject) => {
-      newMeme.save(function (err) {
-        if (err) reject(err)
-        else resolve(newMeme)
-      })
-    })
+    newMeme.save(function (err) {
+      if (err) {
+        console.log(err);
+        return err;
+      } else {
+        console.log(newMeme);
+        return newMeme;
+      }
+    });
+
   }
 }
 var MutationType = new GraphQLObjectType({  
