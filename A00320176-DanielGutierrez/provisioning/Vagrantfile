@@ -5,22 +5,40 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
-  config.vm.define :wb_server do |wb|
-    wb.vm.box = "Centos1704v2"
-    wb.vm.network :private_network, ip: "192.168.56.101"
+  
+  
+  # WEB SERVER 1
+  config.vm.define :wb_server1 do |wb1|
+    wb1.vm.box = "Centos1704v2"
+    wb1.vm.network :private_network, ip: "192.168.56.100"
     #server.vm.network "public_network", bridge: "eth4", ip:"192.168.131.100", netmask: "255.255.255.0"
-    wb.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "512","--cpus", "1", "--name", "wb_server" ]
+    wb1.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "512","--cpus", "1", "--name", "wb_server1" ]
     end
     config.vm.provision :chef_solo do |chef|
       chef.cookbooks_path = "cookbooks"
       chef.add_recipe "httpd"
-      #chef.json = {"courses" => {"name" => "Distribuidos"} }
-      chef.json = {
-        "courses":
-          [{"name":"PDG"},{"name":"Sistemas Distribuidos"}] 
-      }
-
+      chef.add_recipe "client-app"
+      
+      chef.json = {"service_name" => "Serving from node 1"}
+      
+      
+    end
+  end
+  config.vm.define :wb_server2 do |wb2|
+    wb2.vm.box = "Centos1704v2"
+    wb2.vm.network :private_network, ip: "192.168.56.101"
+    #server.vm.network "public_network", bridge: "eth4", ip:"192.168.131.100", netmask: "255.255.255.0"
+    wb2.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "512","--cpus", "1", "--name", "wb_server2" ]
+    end
+    config.vm.provision :chef_solo do |chef|
+      chef.cookbooks_path = "cookbooks"
+      chef.add_recipe "httpd"
+      chef.add_recipe "client-app"
+      
+      chef.json = {"service_name" => "Serving from node 2"}
+      
     end
   end
   config.vm.define :db_server do |db|
@@ -35,5 +53,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       chef.add_recipe "graphql"
       chef.add_recipe "mongodb"
     end
- end
+
+  end
+  
+  # LOAD BALANCER
+  config.vm.define :lb_server do |lb|
+    lb.vm.box = "Centos1704v2"
+    lb.vm.network :private_network, ip: "192.168.56.99"
+    lb.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "512","--cpus", "1", "--name", "lb_server" ]
+    end
+    config.vm.provision :chef_solo do |chef|
+      chef.install = false
+      chef.cookbooks_path = "cookbooks"
+      chef.add_recipe "haproxy"
+      chef.json = {
+        "web_servers" => [
+          {"ip":"192.168.56.100"},
+          {"ip":"192.168.56.101"}
+         ]
+      }
+    end
+  end
 end

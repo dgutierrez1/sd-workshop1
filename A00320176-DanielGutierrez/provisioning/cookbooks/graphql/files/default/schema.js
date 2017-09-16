@@ -1,5 +1,4 @@
 var graphql = require ('graphql'); 
-var Meme = require('./mongodb');
 var {
   GraphQLObjectType,
   GraphQLSchema,
@@ -10,6 +9,7 @@ var {
   GraphQLString,
   GraphQLFloat,
 } = require('graphql');
+var Meme = require('./mongodb');
 
 var MemeType = new graphql.GraphQLObjectType({  
   name: 'meme',
@@ -43,13 +43,17 @@ var queryType = new graphql.GraphQLObjectType({
       memes: {
         type: new graphql.GraphQLList(MemeType),
         resolve: function(){
-            Meme.find((err, memes)=> {
-                if(err){
-                    return err;
-                }else{
-                    return memes;
-                }
-            })
+            return new Promise((resolve, reject) => {
+
+              Meme.find((err, memes)=> {
+                  if(err){
+                      reject( err);
+                  }else{
+                      resolve(memes);
+                  }
+              })
+            });
+            
           }
       }
     }
@@ -73,15 +77,40 @@ var MutationAdd = {
       score: 0
     });
     newMeme.id = newMeme._id
-    newMeme.save(function (err) {
-      if (err) {
-        console.log(err);
-        return err;
-      } else {
-        console.log(newMeme);
-        return newMeme;
-      }
+    return new Promise((resolve, reject) => {
+      newMeme.save(function (err) {
+        if (err) {
+          console.log(err);
+          reject( err);
+        } else {
+          console.log("saving meme");
+          console.log(newMeme);
+          resolve( newMeme);
+        }
+      });
+
     });
+  //   Meme.create(newMeme, function(err, lift) {
+  //     if (err){
+  //       console.log(err);
+  //       return err;
+  //     }else{
+        
+  //       Meme.find(function(err, memes) {
+  //           if (err){
+  //             console.log(err);
+  //             reject( err);
+  //           }else{
+  //             console.log("NEW",newMeme);
+  //             console.log("MEMES", memes);
+  //             resolve(newMeme);
+  //           }
+                
+  //       });
+  //     }
+
+
+  // });
 
   }
 }
