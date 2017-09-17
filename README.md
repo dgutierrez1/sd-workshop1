@@ -3,13 +3,13 @@ Repositorio para la entrega del taller 1 de sistemas distribuidos
 
 Aplicacion web distribuida
 
-##Arquitectura
+## Arquitectura
 
-![taller 1 - arquitectura](https://user-images.githubusercontent.com/17281788/30515215-6b050374-9ae9-11e7-81e2-83973b409608.png)
+![](https://github.com/dgutierrez1/sd-workshop1/blob/master/images/Taller%201%20-%20Arquitectura.jpg)
 
-##Comandos utilizados
+## Comandos utilizados
 
-###NodeJS 
+### NodeJS 
 
 | Comando  | Descripcion | 
 | ------------- | ------------- |
@@ -17,7 +17,7 @@ Aplicacion web distribuida
 | `sudo yum -y install nodejs` | Instalar NodeJS |
 | `sudo yum -y install nodejs` | Instalar NodeJS |
 
-###GraphQL (Los archivos del servidor se van a copiar a la maquina usando Chef)
+### GraphQL (Los archivos del servidor se van a copiar a la maquina usando Chef)
 
 | Comando  | Descripcion | 
 | ------------- | ------------- |
@@ -29,14 +29,14 @@ Aplicacion web distribuida
 | `service firewalld restart` |Reiniciar firewall  |
 
 
-###MongoDB (Los archivos de MongoDB se van a copiar a la maquina usando Chef)
+### MongoDB (Los archivos de MongoDB se van a copiar a la maquina usando Chef)
 
 | Comando  | Descripcion | 
 | ------------- | ------------- |
 | `cp MongoDB.repo /etc/yum.repos.d/mongodb-org-3.2.repo` | Se necesita el copiar el archivo con la informacion de repositorio de MongoDB, ubicado en directorio cookbooks/mongodb/files/default/MongoDB.repo |
 | `yum  install -y mongodb-org` |Instalar MongoDB  |
 
-###**Iniciar MongoDB y servidor GraphQL**
+### **Iniciar MongoDB y servidor GraphQL**
 
 | Comando  | Descripcion | 
 | ------------- | ------------- |
@@ -44,7 +44,7 @@ Aplicacion web distribuida
 | `npm run production --prefix /home/vagrant/graphql-server/ &` |Correr script para generar archivos de produccion del servidor GraphQL e iniciarlo en segundo plano  |
 
 
-###Apache
+### Apache
 
 | Comando  | Descripcion | 
 | ------------- | ------------- |
@@ -57,7 +57,7 @@ Aplicacion web distribuida
 
 
 
-###Aplicacion web de prueba
+### Aplicacion web de prueba
 
 | Comando  | Descripcion | 
 | ------------- | ------------- |
@@ -66,7 +66,7 @@ Aplicacion web distribuida
 | `npm install --prefix /home/vagrant/client/apollo-angular2-example/` | Instalar todas las dependencias de la aplicacion  |
 | `npm run production --prefix /home/vagrant/client/apollo-angular2-example/` | Correr script para construir los archivos de produccion y pasarlos al directorio /var/www/html/ de Apache |
 
-##Tecnologias
+## Tecnologias
 
 | Tecnologia  | Descripcion | Referencia |
 | ------------- | ------------- | ------------- |
@@ -84,9 +84,9 @@ Aplicacion web distribuida
 
 
 
-##Usando Vagrant
+## Usando Vagrant
 
-###Vagrantfile
+### Vagrantfile
 
 ```ruby
 # -*- mode: ruby -*-
@@ -170,6 +170,121 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       }
     end
   end
-end```
+end
+```
 
-    
+## Aprovisinamiento con Chef (cookbooks)
+
+Se muestra en el orden que idealmente deberia seguir el aprovisionamiento
+### 1. GraphQL
+
+Directorio  `cookbooks/graphql`
+
+| Receta  | Funciones | Maquina aprovisionada |
+| ------------- | ------------- | ------------- |
+| graphql_install.rb | <ul><li>Instalar nodejs</li><li>Crear directorios donde se van a copiar los archivos del servidor</li><li>Pasar el archivo `package.json` donde estan las dependencias y scripts que se deben ejecutar posteriormente</li><li>Instalar las dependencias con el comando `npm install --prefix /home/vagrant/graphql-server/`</li></ul> | db_server |
+| graphql_config.rb | <ul><li>Pasar todos los archivos del servidor</li><li>Configurar el firewall</li></ul> | db_server |
+
+
+### 2. MongoDB
+
+Directorio  `cookbooks/mongodb`
+
+| Receta  | Funciones | Maquina aprovisionada |
+| ------------- | ------------- | ------------- |
+| mongodb_install.rb |  <ul><li>Pasar el archivo con la informacion del repositorio de CentOS</li><li>Instalar MongoDB</li><li>Pasar el archivo con la conexion a la base de datos y creacion del Schema y modelos</li></ul>  | db_server |
+| mongodb_config.rb | <ul><li>Iniciar servicio de MongoDB</li><li>Iniciar servidor y todo lo que requiera con el comando `npm run production --prefix /home/vagrant/graphql-server/ `</li></ul> | db_server |
+
+### 3. Apache HTTP
+
+Directorio  `cookbooks/httpd`
+
+| Receta  | Funciones | Maquina aprovisionada |
+| ------------- | ------------- | ------------- |
+| httpd_install.rb | <ul><li>Instalar Apache</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
+| httpd_config.rb | <ul><li>Iniciar servicio httpd</li><li>Inicar y configrar el firewall</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
+| httpd_files.rb | <ul><li>Usando el cookbook template, se pasa un archivo con la informacion del servidor al cual se le hizo la peticion. Se puede acceder al archivo en `http://ip-servidor/server.html`</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
+
+### 4. ClientApp
+
+Directorio  `cookbooks/client-app`
+
+| Receta  | Funciones | Maquina aprovisionada |
+| ------------- | ------------- | ------------- |    
+| default.rb | <ul><li>Instalar NodeJS</li><li>Crear directorios donde se va copiar la aplicacion</li><li>Instalar Git</li><li>Bajar las fuentes de la aplicacion desde el repositorio `https://github.com/dgutierrez1/apollo-angular2-example.git`</li><li><Instalar dependencias de la aplicacion con el comando `npm install --prefix /home/vagrant/client/apollo-angular2-example/`/li><li>Con el comando `npm run production --prefix /home/vagrant/client/apollo-angular2-example/`, crear los archivos de produccion y copiarlos al directorio `var/www/html` para que Apache haga el hosting</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul> |
+
+### 5. HAProxy
+
+Directorio  `cookbooks/haproxy`
+
+| Receta  | Funciones | Maquina aprovisionada |
+| ------------- | ------------- | ------------- |   
+| haproxy_install.rb | <ul><li>Instalar HAProxy</li></ul> | <ul><li>lb_server</li></ul> |   
+| haproxy_config.rb | <ul><li>Usando cookbook template, crear el archivo de configuracion de HAProxy con la informacion de las ips de los web servers (wb_server1 y wb_server2)</li><li>Iniciar servicio de HAProxy</li></ul> | <ul><li>lb_server</li></ul> |   
+
+
+## Pruebas
+
+### DATABASE_SERVER (db_server)
+
+Creando la maquina
+
+![](images/vagrant-up-db_server.PNG)
+Peticion al servidor GraphQL con la base de datos vacia
+
+![](images/curl1.PNG)
+
+
+
+Creacion de dos items usando una mutation en GraphQL
+
+![](images/curl-mutation.PNG)
+![](images/curl-mutation2.PNG)
+Peticion despues de que se crearan los items, variando los atributos requeridos en la respuesta
+
+![](images/curl-query.PNG)
+![](images/curl-query2.PNG)
+![](images/curl-query-3.PNG)
+
+### WEB SERVERS (wb_server1 & wb_server2)
+Creando la maquina **wb_server1** `ip:192.168.56.100`
+
+![](images/vup-wbserver1.JPG)
+
+Template creado para el Web Server 1
+
+![](images/wbserver1.JPG)
+
+Accediendo a la aplicacion con el Web Server 2. Se ven los items creados previamente usando cURL
+
+![](images/webapp1.JPG)
+Creando un nuevo item a traves de la aplicacion
+
+![](images/webapp2.JPG)
+
+Nuevo item visualizandose en la lista de items
+![](images/webapp3.JPG)
+
+Creando la maquina **wb_server2** `ip:192.168.56.101`
+
+![](images/vup-wbserver2.JPG)
+
+Template creado para el Web Server 2
+ 
+![](images/wbserver2.JPG)
+
+Accediendo a la aplicacion con el Web Server 2
+
+![](images/webapp4.JPG)
+
+Accediendo desde el balancedor de carga **lb_server** `ip:192.168.56.99`
+
+![](images/lbserver.JPG)
+
+A traves del balancedor de carga accediendo a ambos web servers
+
+![](images/lbserver2.JPG)
+
+![](images/lbserver3.JPG)
+
+
