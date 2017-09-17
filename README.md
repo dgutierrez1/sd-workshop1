@@ -15,7 +15,6 @@ Aplicacion web distribuida
 | ------------- | ------------- |
 | `curl --silent --location https://rpm.nodesource.com/setup_8.x  \| sudo bash -` | Obtener repositorio para poder instalar NodeJS 8|
 | `sudo yum -y install nodejs` | Instalar NodeJS |
-| `sudo yum -y install nodejs` | Instalar NodeJS |
 
 ### GraphQL (Los archivos del servidor se van a copiar a la maquina usando Chef)
 
@@ -79,7 +78,6 @@ Aplicacion web distribuida
 |Angular4|Angular es una plataforma que facilita la creación de aplicaciones con la web. Angular combina plantillas declarativas, inyección de dependencia, herramientas de extremo a extremo y prácticas recomendadas integradas para resolver desafíos de desarrollo. Angular capacita a los desarrolladores para crear aplicaciones que viven en la web, en el móvil o en el escritorio||
 |Apache|Open-source HTTP server for modern operating systems including UNIX and Windows|https://httpd.apache.org/|
 |HAProxy|HAProxy es una solución gratuita, muy rápida y confiable que ofrece alta disponibilidad, equilibrio de carga y proxy para aplicaciones basadas en TCP y HTTP. Es especialmente adecuado para sitios web de muy alto tráfico y potencia a muchos de los más visitados del mundo. Con el paso de los años, se ha convertido en el estándar de facto de equilibrador de carga de código abierto, ahora se distribuye con la mayoría de las distribuciones mainstream de Linux, ya menudo se implementa por defecto en las plataformas en la nube.|http://www.haproxy.org/|
-||||
 
 
 
@@ -192,7 +190,7 @@ Directorio  `cookbooks/mongodb`
 
 | Receta  | Funciones | Maquina aprovisionada |
 | ------------- | ------------- | ------------- |
-| mongodb_install.rb |  <ul><li>Pasar el archivo con la informacion del repositorio de CentOS</li><li>Instalar MongoDB</li><li>Pasar el archivo con la conexion a la base de datos y creacion del Schema y modelos</li></ul>  | db_server |
+| mongodb_install.rb |  <ul><li>Pasar el archivo con la informacion del repositorio de CentOS para instalar MongoDB</li><li>Instalar MongoDB</li><li>Pasar el archivo con la conexion a la base de datos y creacion del Schema y modelos</li></ul>  | db_server |
 | mongodb_config.rb | <ul><li>Iniciar servicio de MongoDB</li><li>Iniciar servidor y todo lo que requiera con el comando `npm run production --prefix /home/vagrant/graphql-server/ `</li></ul> | db_server |
 
 ### 3. Apache HTTP
@@ -202,8 +200,8 @@ Directorio  `cookbooks/httpd`
 | Receta  | Funciones | Maquina aprovisionada |
 | ------------- | ------------- | ------------- |
 | httpd_install.rb | <ul><li>Instalar Apache</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
-| httpd_config.rb | <ul><li>Iniciar servicio httpd</li><li>Inicar y configrar el firewall</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
-| httpd_files.rb | <ul><li>Usando el cookbook template, se pasa un archivo con la informacion del servidor al cual se le hizo la peticion. Se puede acceder al archivo en `http://ip-servidor/server.html`</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
+| httpd_config.rb | <ul><li>Iniciar servicio httpd</li><li>Iniciar y configrar el firewall</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
+| httpd_files.rb | <ul><li>Usando el cookbook template, se crea un archivo con informacion del servidor que recibio la peticion. Asi, cuando este funcionando el balanceador de carga, se puede saber a cual servidor se direcciono la peticion. Se accede al archivo en `http://ip-servidor/server.html`</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul>  |
 
 ### 4. ClientApp
 
@@ -211,7 +209,7 @@ Directorio  `cookbooks/client-app`
 
 | Receta  | Funciones | Maquina aprovisionada |
 | ------------- | ------------- | ------------- |    
-| default.rb | <ul><li>Instalar NodeJS</li><li>Crear directorios donde se va copiar la aplicacion</li><li>Instalar Git</li><li>Bajar las fuentes de la aplicacion desde el repositorio `https://github.com/dgutierrez1/apollo-angular2-example.git`</li><li><Instalar dependencias de la aplicacion con el comando `npm install --prefix /home/vagrant/client/apollo-angular2-example/`/li><li>Con el comando `npm run production --prefix /home/vagrant/client/apollo-angular2-example/`, crear los archivos de produccion y copiarlos al directorio `var/www/html` para que Apache haga el hosting</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul> |
+| default.rb | <ul><li>Instalar NodeJS</li><li>Crear directorios donde se va copiar la aplicacion</li><li>Instalar Git</li><li>Bajar las fuentes de la aplicacion desde el repositorio `https://github.com/dgutierrez1/apollo-angular2-example.git`</li><li>Instalar dependencias de la aplicacion con el comando `npm install --prefix /home/vagrant/client/apollo-angular2-example/`</li><li>Con el comando `npm run production --prefix /home/vagrant/client/apollo-angular2-example/`, crear los archivos de produccion y copiarlos al directorio `var/www/html` para que Apache haga el hosting</li></ul> | <ul><li>wb_server1</li><li>wb_server2</li></ul> |
 
 ### 5. HAProxy
 
@@ -243,8 +241,12 @@ Creacion de dos items usando una mutation en GraphQL
 Peticion despues de que se crearan los items, variando los atributos requeridos en la respuesta
 
 ![](images/curl-query.PNG)
-![](images/curl-query2.PNG)
-![](images/curl-query-3.PNG)
+
+
+![](images/curl%20-query2.PNG)
+
+
+![](images/curl%20-query-3.PNG)
 
 ### WEB SERVERS (wb_server1 & wb_server2)
 Creando la maquina **wb_server1** `ip:192.168.56.100`
@@ -267,7 +269,7 @@ Nuevo item visualizandose en la lista de items
 
 Creando la maquina **wb_server2** `ip:192.168.56.101`
 
-![](images/vup-wbserver2.JPG)
+![](images/vup_wbserver2.JPG)
 
 Template creado para el Web Server 2
  
@@ -277,7 +279,11 @@ Accediendo a la aplicacion con el Web Server 2
 
 ![](images/webapp4.JPG)
 
-Accediendo desde el balancedor de carga **lb_server** `ip:192.168.56.99`
+Iniciando el balanceador de carga **lb_server** `ip:192.168.56.99`
+
+![](images/vup-lbserver.JPG)
+
+Accediendo desde el balancedor de carga 
 
 ![](images/lbserver.JPG)
 
